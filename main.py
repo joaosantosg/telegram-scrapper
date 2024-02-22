@@ -4,13 +4,18 @@ from telethon import TelegramClient, events
 from datetime import  timedelta
 load_dotenv()
 
-listener_channel = os.getenv("TelegramListenerChannel")
+# listener_channel = os.getenv("TelegramListenerChannel")
+# listener_channel = ["https://t.me/+aiTuewlLTEA3ZGU5", "https://t.me/AutoUdemy", "https://t.me/educafree1", "https://t.me/comunidade_milhas"]
 
 keywords = [
-    "qatar", "qatar airways",
-    "british", "british airways",
-    "iberia", "iberia airlines",
-    "avios"
+    "qatar", 
+    "qatar airways",
+    "british", 
+    "british airways",
+    "iberia",
+    "iberia airlines",
+    "avios",
+    "milhas"
 ]
 
 username = os.getenv("TelegramUsername")
@@ -35,10 +40,11 @@ def mount_message(event, keyword, channel):
             f"**Conteúdo:** {event.message.message}\n" \
             f"**Palavra-chave encontrada:** `{keyword}`\n" \
             f"**Data e hora:** {date}\n" \
-            f"**Link para o canal:** [{channel}]({channel})"
+            # f"**Link para o canal:** [{channel}]({channel})"
 
 async def send_message(users, message):
     for user in users:
+        print(f"Enviando mensagem para {user}")
         await client.send_message(user, message)
 
 @client.on(events.NewMessage(chats=listener_channel))
@@ -48,12 +54,17 @@ async def newMessageListener(event):
     print(f"Nova mensagem no canal {event.chat.title}: {date}")
     for keyword in keywords:
         if keyword in message:
-            message_template = mount_message(event, keyword, listener_channel)
+            # print(event.message.chat)
+            message_template = mount_message(event, keyword, channel=event.chat.title)
 
-            users = ['@jaozinj']  # Add usernames here
+            users = ['@pedrosantos_digital']  # Add that will receive the message
             
             await send_message(users, message_template)
             break
 
 with client:
     client.run_until_disconnected()
+
+
+if __name__ == "__main__":
+    print("Starting...")

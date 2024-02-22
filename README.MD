@@ -1,7 +1,10 @@
 ## Projeto de scraping telegram
 
 ### Objetivo
-O objetivo deste projeto é criar um bot que coleta informações de um site e envia para um grupo no telegram.
+O objetivo deste projeto é criar um bot que coleta informações de um site e envia para um grupo no telegram, utilizando a biblioteca telethon.
+
+Para gerar as chaves de acesso, é necessário criar um aplicativo no site do telegram e obter as chaves de acesso.
+
 
 ### Tecnologias
 - Python
