@@ -19,9 +19,9 @@ def converter_data(data):
 async def montar_mensagem(evento, palavra_chave, canal):
         data = converter_data(evento.message.date)
         if canal:
-            titulo = f"**Canal:** {canal[1]}\n"
+            titulo = f"{canal}"
         else:
-            titulo = f"**Canal:** Não encontrado\n"
+            titulo = f"Não encontrado"
             
             
         return f"**Nova mensagem do canal:**\n\n" \
@@ -34,7 +34,7 @@ async def busca_nome_canal(evento):
     async with connect("mydatabase.db") as conexao:
         canal = await buscar_canal_por_numero(numero=evento.message.chat_id, conexao=conexao)
         if canal:
-            return f"**Canal:** {canal[1]}\n"
+            return canal[1]
         else:
             await atualizar_canais()
             canal = await buscar_canal_por_numero(numero=evento.message.chat_id, conexao=conexao)
@@ -147,8 +147,10 @@ async def inicializar():
 
 
 async def main():
-    log.info("INICIANDO...")
     global cliente 
+    log.info("Iniciando telegram scrapper...")
+    log.info("Canais a serem filtrados: " + str(CANAIS_FILTRADOS))
+    log.info("Pessoas notificadas: " + str(Telegram.LISTENER_CHANNELS))
     cliente = TelegramClient(Telegram.USERNAME, Telegram.API_ID, Telegram.API_HASH)
     await cliente.start()
     await inicializar()
@@ -163,12 +165,16 @@ async def main():
         for palavra_chave in palavras_chave:
             if palavra_chave in mensagem:
                 canal = await busca_nome_canal(evento)
-                if canal not in CANAIS_FILTRADOS:
+                log.info("Canal: " + str(canal))
+                log.info("Checando se canal está na lista de canais filtrados: " + str(canal) + " " + str(CANAIS_FILTRADOS))
+                log.info(canal in CANAIS_FILTRADOS)
+                if canal in  CANAIS_FILTRADOS:
+                    logging.info(f"Palavra-chave encontrada: {palavra_chave}, através do canal: {canal}, enviando mensagem...")
+                    modelo_mensagem = await montar_mensagem(evento, palavra_chave, canal)
+                    usuarios = Telegram.LISTENER_CHANNELS
+                    await enviar_mensagem(usuarios, modelo_mensagem)
                     break
-                modelo_mensagem = await montar_mensagem(evento, palavra_chave, canal)
-                usuarios = Telegram.LISTENER_CHANNELS
-                await enviar_mensagem(usuarios, modelo_mensagem)
-                break
+       
     log.info("Loop de eventos iniciado")
     await cliente.run_until_disconnected()
     log.info("Desconectado")
