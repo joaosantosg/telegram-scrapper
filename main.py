@@ -5,6 +5,7 @@ import asyncio
 import logging
 from aiosqlite import connect
 from config import Telegram
+import re
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("telegram-scrapper")
@@ -15,6 +16,28 @@ def converter_data(data):
     data_utc = data - timedelta(hours=3)
     return data_utc.strftime("%d/%m/%Y %H:%M")
 
+
+def remover_acentos(texto):
+    # Dicionário de mapeamento de caracteres acentuados para não acentuados
+    mapa_acentos = {
+        'á': 'a', 'à': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a',
+        'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e',
+        'í': 'i', 'ì': 'i', 'î': 'i', 'ï': 'i',
+        'ó': 'o', 'ò': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o',
+        'ú': 'u', 'ù': 'u', 'û': 'u', 'ü': 'u',
+        'ç': 'c',
+        'Á': 'A', 'À': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A',
+        'É': 'E', 'È': 'E', 'Ê': 'E', 'Ë': 'E',
+        'Í': 'I', 'Ì': 'I', 'Î': 'I', 'Ï': 'I',
+        'Ó': 'O', 'Ò': 'O', 'Ô': 'O', 'Õ': 'O', 'Ö': 'O',
+        'Ú': 'U', 'Ù': 'U', 'Û': 'U', 'Ü': 'U',
+        'Ç': 'C'
+    }
+    
+    # Utiliza expressão regular para substituir os caracteres acentuados
+    texto_sem_acentos = ''.join(mapa_acentos.get(char, char) for char in texto)
+    
+    return texto_sem_acentos
 
 async def montar_mensagem(evento, palavra_chave, canal):
         data = converter_data(evento.message.date)
@@ -49,6 +72,7 @@ palavras_chave = [
     "qatar",
     "british",
     "iberia",
+    "ibéria",
     "avios",
 ]
 
@@ -158,7 +182,7 @@ async def main():
     
     @cliente.on(events.NewMessage())
     async def ouvinte_nova_mensagem(evento):
-        mensagem = evento.message.text.lower()
+        mensagem = remover_acentos(evento.message.text.lower())
         data = converter_data(evento.message.date)
         log.info(f"Nova mensagem recebida: {data}")
 
